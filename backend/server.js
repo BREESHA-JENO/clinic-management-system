@@ -28,5 +28,6 @@ app.use('api/pharmacist',pharmacistRouter)
 connectDB().then(()=>{
     app.listen(PORT,()=>{
         console.log(`Server running on port ${PORT}`);
+        console.log("hii")
     });
 });
