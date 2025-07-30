@@ -88,6 +88,7 @@ const MedicinePrescriptionSchema = new mongoose.Schema({
 });
 
 MedicinePrescriptionSchema.pre('save', async function (next) {
+    console.log("hello");
   if (this.medicinePrescriptionId) return next();
 
   try {
