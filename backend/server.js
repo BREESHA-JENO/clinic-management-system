@@ -1,20 +1,11 @@
-const express=require('express');
-const mongoose=require('mongoose');
 require('dotenv').config();
-const cors=require('cors');
-const connectDB=require('./config/db');
-
-const adminRouter=require('./routers/adminRouter');
-const receptionistRouter=require('./routers/receptionistRouter');
-const doctorRouter=require('./routers/doctorRouter');
-const labtechnicianRouter = require('./routers/labtechnicianRouter');
-const pharmacistRouter=require('./routers/pharmacistRouter')
-
-const PORT=process.env.PORT||8000;
-const app=express();
-
-//middleware -->act between req and res
-app.use(cors());
+const express = require('express');
+const mongoose = require('mongoose');
+const adminRoutes = require('./routers/adminRouter');
+const jwt = require('jsonwebtoken');
+const User = require('./models/user');
+const bcrypt=require('bcryptjs');
+const app = express();
 app.use(express.json());
 
 //Routes
