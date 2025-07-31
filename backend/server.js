@@ -8,7 +8,7 @@ const adminRouter=require('./routers/adminRouter');
 const receptionistRouter=require('./routers/receptionistRouter');
 const doctorRouter=require('./routers/doctorRouter');
 const labtechnicianRouter = require('./routers/labtechnicianRouter');
-const pharmacistRouter=require('./routers/pharmacistRouter')
+const pharmacistRouter=require('./routers/pharmacistRouter');
 
 const PORT=process.env.PORT||8000;
 const app=express();
@@ -22,7 +22,8 @@ app.use('/api/admin',adminRouter);
 app.use('/api/receptionist',receptionistRouter);
 app.use('/api/doctor',doctorRouter);
 app.use('/api/labtechnician', labtechnicianRouter);
-app.use('api/pharmacist',pharmacistRouter)
+app.use('/api/pharmacist',pharmacistRouter);
+
 
 //connect to DB and start the server
 connectDB().then(()=>{
