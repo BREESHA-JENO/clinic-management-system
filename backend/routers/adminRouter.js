@@ -3,7 +3,11 @@ const router = express.Router();
 const controller = require('../controllers/adminController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const validate = require('../validation/adminValidation');
+const { authMiddleware } = require('../middleware/auth');
+const { authorizeRoles } = require('../middleware/roleAuth');
+const { createUser } = require('../controllers/adminController');
 
+router.post('/create-user', authMiddleware, authorizeRoles('admin'), createUser);
 // 🔹 Apply auth middleware (JWT + Admin check)
 router.use(verifyToken, isAdmin);
 
@@ -15,11 +19,14 @@ router.put('/roles/:roleId', validate.validateRole, controller.updateRole);
 router.patch('/roles/:roleId/deactivate', controller.deactivateRole);
 
 // ✅ STAFF ROUTES
+
 router.post('/staff', validate.validateStaff, controller.createStaff);
 router.get('/staff', controller.getAllStaff);
-router.get('/staff/:staffId', controller.getStaffById);
-router.put('/staff/:staffId', validate.validateStaff, controller.updateStaff);
-router.patch('/staff/:staffId/deactivate', controller.deactivateStaff);
+router.get('/staff/:id', controller.getStaff);
+router.put('/staff/:id', controller.updateStaff);
+router.delete('/staff/:id', controller.deactivateStaff);
+
+
 
 // ✅ SPECIALIZATION ROUTES
 router.post('/specializations', validate.validateSpecialization, controller.createSpecialization);
