@@ -1,8 +1,8 @@
 const adminModels = require('../models/admin');
 const User = require('../models/user');
 const mongoose = require('mongoose');
-const { Role, Staff, Specialization, Doctor } = adminModels;
 
+const { Role, Staff, Specialization, Doctor } = adminModels;
 
 exports.createUser = async (req, res) => {
     try {

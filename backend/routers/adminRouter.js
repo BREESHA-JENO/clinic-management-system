@@ -10,6 +10,10 @@ const { createUser } = require('../controllers/adminController');
 router.post('/create-user', authMiddleware, authorizeRoles('admin'), createUser);
 // 🔹 Apply auth middleware (JWT + Admin check)
 router.use(verifyToken, isAdmin);
+router.post('/admin', (req, res) => {
+  // handle admin creation here
+  res.send('Admin created');
+});
 
 // ✅ ROLE ROUTES
 router.post('/roles', validate.validateRole, controller.createRole);
@@ -23,8 +27,8 @@ router.patch('/roles/:roleId/deactivate', controller.deactivateRole);
 router.post('/staff', validate.validateStaff, controller.createStaff);
 router.get('/staff', controller.getAllStaff);
 router.get('/staff/:id', controller.getStaff);
-router.put('/staff/:id', controller.updateStaff);
-router.delete('/staff/:id', controller.deactivateStaff);
+router.put('/staff/:identifier', controller.updateStaff);
+router.patch('/staff/:identifier', controller.deactivateStaff);
 
 
 
