@@ -12,6 +12,12 @@ const bcrypt=require('bcryptjs');
 const app = express();
 app.use(express.json());
 
+//Routes
+app.use('/api/admin',adminRouter);
+app.use('/api/receptionist',receptionistRouter);
+app.use('/api/doctor',doctorRouter);
+app.use('/api/labtechnician', labtechnicianRouter);
+app.use('api/pharmacist',pharmacistRouter)
 
 // 🔹 MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
