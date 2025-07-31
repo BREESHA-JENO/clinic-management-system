@@ -20,7 +20,6 @@ function calculateAge(dob) {
 const staffSchema = new mongoose.Schema({
     staffId: { type: String, unique: true }, // e.g., rec001, doc001, lab001, ph001
     name: { type: String, required: true },
-
     email: {
         type: String,
         required: true,
@@ -67,7 +66,7 @@ staffSchema.pre('save', async function (next) {
             const prefixMap = {
                 receptionist: 'rec',
                 doctor: 'doc',
-                'lab technician': 'lab',
+                labtechnician: 'lab',
                 pharmacist: 'ph'
             };
 

@@ -2,6 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const adminRoutes = require('./routers/adminRouter');
+//const receptionistRoutes = require('./routers/receptionist');
+//const doctorRoutes = require('./routers/doctor');
+//const labtechRoutes = require('./routers/labtech');
+//const pharmacistRoutes = require('./routers/pharmacist');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const bcrypt=require('bcryptjs');
@@ -13,43 +17,22 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB Error:', err));
-
-// 🔹 Admin Login Endpoint (returns JWT)
 app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-
-        // ✅ Validate input
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Username and Password required' });
-        }
-
-        // ✅ Find user in DB
         const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid Credentials' });
-        }
+        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-        // ✅ Compare Password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid Credentials' });
-        }
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-        // ✅ Generate Token
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: '3h' }
-        );
-
-        res.json({ token });
-
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token, role: user.role });
     } catch (err) {
-        console.error('❌ Login Error:', err);
-        res.status(500).json({ message: 'Server Error', error: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
+
 
 // 🔹 Register new admin (optional)
 app.post('/api/admin/register', async (req, res) => {
@@ -64,6 +47,10 @@ app.post('/api/admin/register', async (req, res) => {
 
 // 🔹 Admin Routes
 app.use('/api', adminRoutes);
+//app.use('/api/receptionist', receptionistRoutes);
+//app.use('/api/doctor', doctorRoutes);
+//app.use('/api/labtech', labtechRoutes);
+//app.use('/api/pharmacist', pharmacistRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Clinic Management System API');
