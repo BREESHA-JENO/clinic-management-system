@@ -1,4 +1,4 @@
-const { Medicine, MedicinePrescription, MedicineInventory, MedicineBill } = require('../models/pharmacist');
+const { Medicine, MedicinePrescriptionItem, MedicineInventory, MedicineBill } = require('../models/pharmacist');
 
 // Medicine Management
 exports.addMedicine = async (req, res) => {
@@ -129,7 +129,7 @@ exports.createMedicinePrescription = async (req, res) => {
     // Generate unique prescription ID
     const prescriptionId = `PRESC${Date.now()}`;
 
-    const prescription = new MedicinePrescription({
+    const prescription = new MedicinePrescriptionItem({
       prescriptionId,
       appointmentId,
       medicineId,
@@ -153,7 +153,7 @@ exports.createMedicinePrescription = async (req, res) => {
 exports.getMedicinePrescriptionById = async (req, res) => {
   try {
     const { prescriptionId } = req.params;
-    const prescription = await MedicinePrescription.findOne({ prescriptionId });
+    const prescription = await MedicinePrescriptionItem.findOne({ prescriptionId });
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
     res.json(prescription);
   } catch (err) {
@@ -164,7 +164,7 @@ exports.getMedicinePrescriptionById = async (req, res) => {
 exports.getPatientPrescriptions = async (req, res) => {
   try {
     const { patientName } = req.params;
-    const prescriptions = await MedicinePrescription.find({ patientName });
+    const prescriptions = await MedicinePrescriptionItem.find({ patientName });
     res.json(prescriptions);
   } catch (err) {
     res.status(400).json({ error: err.message });

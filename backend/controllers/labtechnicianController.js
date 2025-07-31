@@ -1,4 +1,4 @@
-const { LabTest, LabTestPrescription, LabTestResult } = require('../models/labtechnician');
+const { LabTest, LabTestPrescriptionItem, LabTestResult } = require('../models/labtechnician');
 
 // Lab Test Management
 exports.addLabTest = async (req, res) => {
@@ -87,8 +87,8 @@ exports.recordLabTestResult = async (req, res) => {
       recordedByTechnicianName 
     } = req.body;
     
-    const labTestPrescriptionId = req.params.labTestPrescriptionId;
-    const prescription = await LabTestPrescription.findById(labTestPrescriptionId);
+    const labTestPrescriptionItemId = req.params.labTestPrescriptionId;
+    const prescription = await LabTestPrescriptionItem.findById(labTestPrescriptionItemId);
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
     
     // Get the lab test details to get testId and price
@@ -109,7 +109,7 @@ exports.recordLabTestResult = async (req, res) => {
     
     const labTestResult = new LabTestResult({ 
       resultId,
-      labTestPrescriptionId, 
+      labTestPrescriptionItemId, 
       testId: labTest.testId,
       result, 
       currentValue,
@@ -134,9 +134,9 @@ exports.recordLabTestResult = async (req, res) => {
 exports.getLabTestResultByAppointmentId = async (req, res) => {
   try {
     const { appointmentId } = req.params;
-    const prescription = await LabTestPrescription.findOne({ appointmentId });
+    const prescription = await LabTestPrescriptionItem.findOne({ appointmentId });
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
-    const result = await LabTestResult.findOne({ labTestPrescriptionId: prescription._id });
+    const result = await LabTestResult.findOne({ labTestPrescriptionItemId: prescription._id });
     if (!result) return res.status(404).json({ error: 'Result not found' });
     
     // Return comprehensive result information
@@ -175,7 +175,7 @@ exports.getLabTestResultById = async (req, res) => {
     if (!result) return res.status(404).json({ error: 'Lab test result not found' });
     
     // Get prescription details
-    const prescription = await LabTestPrescription.findById(result.labTestPrescriptionId);
+    const prescription = await LabTestPrescriptionItem.findById(result.labTestPrescriptionItemId);
     
     // Return comprehensive result information
     const resultDetails = {
@@ -219,7 +219,7 @@ exports.listLabTestResultsByDateRange = async (req, res) => {
 
 exports.deactivateLabTestPrescription = async (req, res) => {
   try {
-    const prescription = await LabTestPrescription.findByIdAndUpdate(
+    const prescription = await LabTestPrescriptionItem.findByIdAndUpdate(
       req.params.labTestPrescriptionId,
       { isActive: false },
       { new: true }
@@ -259,7 +259,7 @@ exports.processDoctorLabTestPrescription = async (req, res) => {
     const { testPrescriptionId, testId, patientId, doctorId } = req.body;
     
     // Validate lab test prescription exists
-    const labTestPrescription = await require('../models/doctor').DoctorLabTestPrescription.findOne({ testPrescriptionId });
+    const labTestPrescription = await require('../models/doctor').LabTestPrescription.findOne({ labTestPrescriptionId: testPrescriptionId });
     if (!labTestPrescription) {
       return res.status(404).json({ error: 'Lab test prescription not found' });
     }
@@ -271,8 +271,8 @@ exports.processDoctorLabTestPrescription = async (req, res) => {
     }
 
     // Update lab test prescription status
-    await require('../models/doctor').DoctorLabTestPrescription.findOneAndUpdate(
-      { testPrescriptionId },
+    await require('../models/doctor').LabTestPrescription.findOneAndUpdate(
+      { labTestPrescriptionId: testPrescriptionId },
       { status: 'in_progress' }
     );
 

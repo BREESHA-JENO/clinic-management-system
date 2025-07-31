@@ -10,8 +10,8 @@ const MedicineSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
-// Medicine Prescription Schema
-const MedicinePrescriptionSchema = new mongoose.Schema({
+// Medicine Prescription Item Schema
+const MedicinePrescriptionItemSchema = new mongoose.Schema({
   prescriptionId: { type: String, required: true, unique: true },
   appointmentId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Appointment' },
   medicineId: { type: String, required: true }, // Reference to Medicine medicineId
@@ -60,13 +60,13 @@ const MedicineBillSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Medicine = mongoose.model('Medicine', MedicineSchema);
-const MedicinePrescription = mongoose.model('MedicinePrescription', MedicinePrescriptionSchema);
+const MedicinePrescriptionItem = mongoose.model('MedicinePrescriptionItem', MedicinePrescriptionItemSchema);
 const MedicineInventory = mongoose.model('MedicineInventory', MedicineInventorySchema);
 const MedicineBill = mongoose.model('MedicineBill', MedicineBillSchema);
 
 module.exports = {
   Medicine,
-  MedicinePrescription,
+  MedicinePrescriptionItem,
   MedicineInventory,
   MedicineBill,
 };
