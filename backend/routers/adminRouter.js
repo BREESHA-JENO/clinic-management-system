@@ -6,7 +6,7 @@ const validate = require('../validation/adminValidation');
 const { authMiddleware } = require('../middleware/auth');
 const { authorizeRoles } = require('../middleware/roleAuth');
 const { createUser } = require('../controllers/adminController');
-
+console.log("hi");
 router.post('/create-user', authMiddleware, authorizeRoles('admin'), createUser);
 // 🔹 Apply auth middleware (JWT + Admin check)
 router.use(verifyToken, isAdmin);

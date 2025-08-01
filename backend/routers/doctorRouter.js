@@ -17,7 +17,7 @@ const controller = require('../controllers/doctorController');
 const validation = require('../validation/doctorValidation');
 const { validationResult } = require('express-validator');
 
-
+console.log("hhh");
 const User = require('../models/user'); // Assuming your user model is in models/user.js
 const bcrypt = require('bcryptjs');
 

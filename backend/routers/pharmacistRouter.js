@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pharmacistController = require('../controllers/pharmacistController');
+console.log("hello");
 router.post('/', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {

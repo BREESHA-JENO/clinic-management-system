@@ -12,5 +12,5 @@ router.post('/', (req, res) => {
   // Logic to create or validate doctor user
   res.status(201).json({ message: 'receptionist login or creation successful' });
 });
-
+console.log("h");
 module.exports = router;
