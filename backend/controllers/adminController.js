@@ -1,4 +1,10 @@
 const adminModels = require('../models/admin');
+<<<<<<< HEAD
+const mongoose = require('mongoose');
+const { Role, Staff, Specialization, Doctor } = adminModels;
+
+
+=======
 const User = require('../models/user');
 const mongoose = require('mongoose');
 
@@ -22,6 +28,7 @@ exports.createUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 // ✅ ROLE MANAGEMENT
 exports.createRole = async (req, res) => {
     try {

@@ -1,24 +1,21 @@
+require('dotenv').config();
+const cors=require('cors');
+const connectDB=require('./config/db');
 const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
-const cors = require('cors');
-const connectDB = require('./config/db');
-
-// Import Routers
-const adminRouter = require('./routers/adminRouter');           // OK
-const receptionistRouter = require('./routers/receptionistRouter'); // OK
-const doctorRouter = require('./routers/doctorRouter');         // OK
-const labtechnicianRouter = require('./routers/labtechnicianRouter'); // OK
-const pharmacistRouter = require('./routers/pharmacistRouter'); // OK
-
-
-const PORT = process.env.PORT || 8000;
-const app = express();
 const jwt = require('jsonwebtoken');
+
+const adminRouter = require('./routers/adminRouter');
+const receptionistRouter = require('./routers/receptionistRouter');
+const doctorRouter = require('./routers/doctorRouter');
+const labtechnicianRouter = require('./routers/labtechnicianRouter');
+const pharmacistRouter = require('./routers/pharmacistRouter');
+
+const app=express();
+
+//middleware -->act between req and res
 const User = require('./models/user');
 const bcrypt=require('bcryptjs');
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -54,7 +51,7 @@ app.post('/api/admin/register', async (req, res) => {
     }
 });
 
-// Routes
+//Routes
 app.use('/api/admin', adminRouter);
 app.use('/api/receptionist', receptionistRouter);
 app.use('/api/doctor', doctorRouter);

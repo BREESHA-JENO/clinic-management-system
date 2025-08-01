@@ -9,8 +9,13 @@ const LabTestSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
+<<<<<<< HEAD
+// Lab Test Prescription Schema
+const LabTestPrescriptionSchema = new mongoose.Schema({
+=======
 // Lab Test Prescription Item Schema
 const LabTestPrescriptionItemSchema = new mongoose.Schema({
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   appointmentId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Appointment' },
   labTestId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTest' },
   prescribedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' },
@@ -22,7 +27,11 @@ const LabTestPrescriptionItemSchema = new mongoose.Schema({
 // Lab Test Result Schema
 const LabTestResultSchema = new mongoose.Schema({
   resultId: { type: String, required: true, unique: true },
+<<<<<<< HEAD
+  labTestPrescriptionId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTestPrescription' },
+=======
   labTestPrescriptionItemId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTestPrescriptionItem' },
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   testId: { type: String, required: true }, // Reference to LabTest testId
   result: { type: String, required: true },
   currentValue: { type: Number, required: true },
@@ -40,11 +49,19 @@ const LabTestResultSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const LabTest = mongoose.model('LabTest', LabTestSchema);
+<<<<<<< HEAD
+const LabTestPrescription = mongoose.model('LabTestPrescription', LabTestPrescriptionSchema);
+=======
 const LabTestPrescriptionItem = mongoose.model('LabTestPrescriptionItem', LabTestPrescriptionItemSchema);
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 const LabTestResult = mongoose.model('LabTestResult', LabTestResultSchema);
 
 module.exports = {
   LabTest,
+<<<<<<< HEAD
+  LabTestPrescription,
+=======
   LabTestPrescriptionItem,
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   LabTestResult,
 };
