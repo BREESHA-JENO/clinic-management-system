@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/adminController');
+<<<<<<< HEAD
 const { verifyToken } = require('../middleware/auth');
 const validate = require('../validation/adminValidation');
 const { authMiddleware } = require('../middleware/auth');
@@ -8,6 +9,21 @@ const { authorizeRoles } = require('../middleware/roleAuth');
 
 // 🔹 Apply auth middleware (JWT + Admin check)
 router.use(verifyToken);
+=======
+const { verifyToken, isAdmin } = require('../middleware/auth');
+const validate = require('../validation/adminValidation');
+const { authMiddleware } = require('../middleware/auth');
+const { authorizeRoles } = require('../middleware/roleAuth');
+const { createUser } = require('../controllers/adminController');
+
+router.post('/create-user', authMiddleware, authorizeRoles('admin'), createUser);
+// 🔹 Apply auth middleware (JWT + Admin check)
+router.use(verifyToken, isAdmin);
+router.post('/admin', (req, res) => {
+  // handle admin creation here
+  res.send('Admin created');
+});
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 
 // ✅ ROLE ROUTES
 router.post('/roles', validate.validateRole, controller.createRole);
@@ -21,8 +37,13 @@ router.patch('/roles/:roleId/deactivate', controller.deactivateRole);
 router.post('/staff', validate.validateStaff, controller.createStaff);
 router.get('/staff', controller.getAllStaff);
 router.get('/staff/:id', controller.getStaff);
+<<<<<<< HEAD
 router.put('/staff/:id', controller.updateStaff);
 router.delete('/staff/:id', controller.deactivateStaff);
+=======
+router.put('/staff/:identifier', controller.updateStaff);
+router.patch('/staff/:identifier', controller.deactivateStaff);
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 
 
 

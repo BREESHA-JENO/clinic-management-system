@@ -1,8 +1,34 @@
 const adminModels = require('../models/admin');
+<<<<<<< HEAD
 const mongoose = require('mongoose');
 const { Role, Staff, Specialization, Doctor } = adminModels;
 
 
+=======
+const User = require('../models/user');
+const mongoose = require('mongoose');
+
+const { Role, Staff, Specialization, Doctor } = adminModels;
+
+exports.createUser = async (req, res) => {
+    try {
+        const { username, password, role } = req.body;
+        const allowedRoles = ['receptionist', 'doctor', 'labtech', 'pharmacist'];
+        if (!allowedRoles.includes(role)) {
+            return res.status(400).json({ message: 'Invalid role. Admin can only create staff.' });
+        }
+
+        const existing = await User.findOne({ username });
+        if (existing) return res.status(400).json({ message: 'Username already exists' });
+
+        const user = new User({ username, password, role });
+        await user.save();
+        res.status(201).json({ message: `${role} created successfully`, user: { username, role } });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 // ✅ ROLE MANAGEMENT
 exports.createRole = async (req, res) => {
     try {

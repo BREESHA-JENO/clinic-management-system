@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const { Medicine, MedicinePrescription, MedicineInventory, MedicineBill } = require('../models/pharmacist');
+=======
+const { Medicine, MedicinePrescriptionItem, MedicineInventory, MedicineBill } = require('../models/pharmacist');
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 
 // Medicine Management
 exports.addMedicine = async (req, res) => {
@@ -129,7 +133,11 @@ exports.createMedicinePrescription = async (req, res) => {
     // Generate unique prescription ID
     const prescriptionId = `PRESC${Date.now()}`;
 
+<<<<<<< HEAD
     const prescription = new MedicinePrescription({
+=======
+    const prescription = new MedicinePrescriptionItem({
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
       prescriptionId,
       appointmentId,
       medicineId,
@@ -153,7 +161,11 @@ exports.createMedicinePrescription = async (req, res) => {
 exports.getMedicinePrescriptionById = async (req, res) => {
   try {
     const { prescriptionId } = req.params;
+<<<<<<< HEAD
     const prescription = await MedicinePrescription.findOne({ prescriptionId });
+=======
+    const prescription = await MedicinePrescriptionItem.findOne({ prescriptionId });
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
     res.json(prescription);
   } catch (err) {
@@ -164,7 +176,11 @@ exports.getMedicinePrescriptionById = async (req, res) => {
 exports.getPatientPrescriptions = async (req, res) => {
   try {
     const { patientName } = req.params;
+<<<<<<< HEAD
     const prescriptions = await MedicinePrescription.find({ patientName });
+=======
+    const prescriptions = await MedicinePrescriptionItem.find({ patientName });
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
     res.json(prescriptions);
   } catch (err) {
     res.status(400).json({ error: err.message });

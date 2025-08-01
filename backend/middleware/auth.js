@@ -17,6 +17,7 @@ exports.isAdmin = (req, res, next) => {
         return res.status(403).json({ message: 'Access denied. Admins only.' });
     }
     next();
+<<<<<<< HEAD
 };
 
 // JWT Secret (in production, this should be in environment variables)
@@ -118,3 +119,6 @@ module.exports = {
   authorizeRole,
   JWT_SECRET
 }; 
+=======
+};
+>>>>>>> d890af73c091528a847f4dd611078c653778c3e1
