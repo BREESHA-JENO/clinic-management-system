@@ -34,6 +34,8 @@ const validateRegisterPatient = [
       return true;
     }),
   body('gender')
+    .trim()
+    .toLowerCase()
     .isIn(['male', 'female', 'other'])
     .withMessage('Gender must be male, female, or other'),
   body('bloodGroup')
@@ -72,6 +74,8 @@ const validateUpdatePatient = [
     }),
   body('gender')
     .optional()
+    .trim()
+    .toLowerCase()
     .isIn(['male', 'female', 'other'])
     .withMessage('Gender must be male, female, or other'),
   body('bloodGroup')
@@ -137,6 +141,44 @@ const validateRegisterDoctor = [
     .trim()
     .matches(/^[\d\s\-\+\(\)]+$/)
     .withMessage('Phone number can only contain digits, spaces, hyphens, and parentheses'),
+  body('dob')
+    .isISO8601()
+    .withMessage('Date of birth must be a valid date')
+    .custom((value) => {
+      const dob = new Date(value);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      if (age < 25) {
+        throw new Error('Doctor must be at least 25 years old');
+      }
+      return true;
+    }),
+  body('address')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Address must be between 5 and 200 characters'),
+  body('workingDays')
+    .optional()
+    .isArray()
+    .withMessage('Working days must be an array'),
+  body('workingHours.start')
+    .optional()
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('Start time must be in HH:MM format'),
+  body('workingHours.end')
+    .optional()
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('End time must be in HH:MM format'),
+  body('qualifications')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Qualifications must be between 2 and 200 characters'),
+  body('experience')
+    .optional()
+    .isInt({ min: 0, max: 50 })
+    .withMessage('Experience must be between 0 and 50 years'),
   body('isActive')
     .optional()
     .isBoolean()
@@ -170,6 +212,32 @@ const validateUpdateDoctor = [
     .trim()
     .matches(/^[\d\s\-\+\(\)]+$/)
     .withMessage('Phone number can only contain digits, spaces, hyphens, and parentheses'),
+  body('address')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Address must be between 5 and 200 characters'),
+  body('workingDays')
+    .optional()
+    .isArray()
+    .withMessage('Working days must be an array'),
+  body('workingHours.start')
+    .optional()
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('Start time must be in HH:MM format'),
+  body('workingHours.end')
+    .optional()
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('End time must be in HH:MM format'),
+  body('qualifications')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Qualifications must be between 2 and 200 characters'),
+  body('experience')
+    .optional()
+    .isInt({ min: 0, max: 50 })
+    .withMessage('Experience must be between 0 and 50 years'),
   body('isActive')
     .optional()
     .isBoolean()

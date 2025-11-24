@@ -19,7 +19,7 @@ const registerPatient = async (req, res) => {
       patientId,
       name,
       dob,
-      gender,
+      gender: gender.toLowerCase(), // Convert to lowercase to match enum values
       bloodGroup,
       status: status || 'active'
     });
@@ -46,6 +46,11 @@ const updatePatient = async (req, res) => {
   try {
     const { patientId } = req.params;
     const updateData = req.body;
+
+    // Convert gender to lowercase if it's being updated
+    if (updateData.gender) {
+      updateData.gender = updateData.gender.toLowerCase();
+    }
 
     const patient = await Patient.findOneAndUpdate(
       { patientId },
@@ -233,27 +238,69 @@ const getPatientHistory = async (req, res) => {
 // Register Doctor
 const registerDoctor = async (req, res) => {
   try {
-    const { doctorId, name, specialization, email, phone, isActive } = req.body;
+    const { doctorId, name, specialization, email, phone, isActive, dob, address, workingDays, workingHours, qualifications, experience } = req.body;
 
-    // Check if doctor already exists
-    const existingDoctor = await Doctor.findOne({ doctorId });
-    if (existingDoctor) {
-      return res.status(400).json({
+    // Check if doctor already exists by querying the staff collection
+    const existingStaff = await Staff.findOne({ staffId: doctorId });
+    if (existingStaff) {
+      const existingDoctor = await Doctor.findOne({ staff: existingStaff._id });
+      if (existingDoctor) {
+        return res.status(400).json({
+          success: false,
+          message: 'Doctor with this ID already exists'
+        });
+      }
+    }
+
+    // First, we need to create a Staff member
+    // Get the Doctor role
+    const Role = require('../models/admin').Role;
+    const doctorRole = await Role.findOne({ name: 'Doctor' });
+    if (!doctorRole) {
+      return res.status(500).json({
         success: false,
-        message: 'Doctor with this ID already exists'
+        message: 'Doctor role not found in system'
       });
     }
 
-    const doctor = new Doctor({
-      doctorId,
+    // Create Staff member
+    const staff = new Staff({
+      staffId: doctorId,
       name,
-      specialization,
       email,
       phone,
-      isActive: isActive !== undefined ? isActive : true
+      address,
+      role: doctorRole._id,
+      dob: new Date(dob),
+      active: isActive !== undefined ? isActive : true
+    });
+
+    await staff.save();
+
+    // Get the specialization
+    const Specialization = require('../models/admin').Specialization;
+    let specializationDoc = await Specialization.findOne({ name: specialization });
+    if (!specializationDoc) {
+      // Create specialization if it doesn't exist
+      specializationDoc = new Specialization({ name: specialization });
+      await specializationDoc.save();
+    }
+
+    // Create Doctor record
+    const doctor = new Doctor({
+      staff: staff._id,
+      specialization: specializationDoc._id,
+      qualifications,
+      experience,
+      workingDays: workingDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      workingHours: workingHours || { start: '09:00', end: '17:00' },
+      active: isActive !== undefined ? isActive : true
     });
 
     await doctor.save();
+
+    // Populate the staff data for response
+    await doctor.populate('staff');
 
     res.status(201).json({
       success: true,
@@ -275,7 +322,15 @@ const getDoctorById = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    const doctor = await Doctor.findOne({ doctorId });
+    const existingStaff = await Staff.findOne({ staffId: doctorId });
+    if (!existingStaff) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
+    const doctor = await Doctor.findOne({ staff: existingStaff._id }).populate('staff');
 
     if (!doctor) {
       return res.status(404).json({
@@ -305,25 +360,89 @@ const listAllDoctors = async (req, res) => {
     
     const query = {};
     if (isActive !== undefined) {
-      query.isActive = isActive === 'true';
+      query.active = isActive === 'true';
     }
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };
     }
+
+    // Build aggregation pipeline for search
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'staff',
+          localField: 'staff',
+          foreignField: '_id',
+          as: 'staffData'
+        }
+      },
+      {
+        $unwind: '$staffData'
+      }
+    ];
+
+    // Add search conditions
     if (search) {
-      query.$or = [
-        { doctorId: { $regex: search, $options: 'i' } },
-        { name: { $regex: search, $options: 'i' } },
-        { specialization: { $regex: search, $options: 'i' } }
-      ];
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'staffData.staffId': { $regex: search, $options: 'i' } },
+            { 'staffData.name': { $regex: search, $options: 'i' } },
+            { specialization: { $regex: search, $options: 'i' } }
+          ]
+        }
+      });
     }
 
-    const doctors = await Doctor.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+    // Add other filters
+    if (Object.keys(query).length > 0) {
+      pipeline.push({ $match: query });
+    }
 
-    const total = await Doctor.countDocuments(query);
+    // Add sorting and pagination
+    pipeline.push(
+      { $sort: { createdAt: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit * 1 }
+    );
+
+    const doctors = await Doctor.aggregate(pipeline);
+
+    // Get total count
+    const countPipeline = [
+      {
+        $lookup: {
+          from: 'staff',
+          localField: 'staff',
+          foreignField: '_id',
+          as: 'staffData'
+        }
+      },
+      {
+        $unwind: '$staffData'
+      }
+    ];
+
+    if (search) {
+      countPipeline.push({
+        $match: {
+          $or: [
+            { 'staffData.staffId': { $regex: search, $options: 'i' } },
+            { 'staffData.name': { $regex: search, $options: 'i' } },
+            { specialization: { $regex: search, $options: 'i' } }
+          ]
+        }
+      });
+    }
+
+    if (Object.keys(query).length > 0) {
+      countPipeline.push({ $match: query });
+    }
+
+    countPipeline.push({ $count: 'total' });
+
+    const totalResult = await Doctor.aggregate(countPipeline);
+    const total = totalResult[0]?.total || 0;
 
     res.json({
       success: true,
@@ -350,11 +469,19 @@ const updateDoctor = async (req, res) => {
     const { doctorId } = req.params;
     const updateData = req.body;
 
+    const existingStaff = await Staff.findOne({ staffId: doctorId });
+    if (!existingStaff) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+
     const doctor = await Doctor.findOneAndUpdate(
-      { doctorId },
+      { staff: existingStaff._id },
       updateData,
       { new: true, runValidators: true }
-    );
+    ).populate('staff');
 
     if (!doctor) {
       return res.status(404).json({
@@ -398,7 +525,14 @@ const scheduleAppointment = async (req, res) => {
     }
 
     // Check if doctor exists
-    const doctor = await Doctor.findOne({ doctorId });
+    const existingStaff = await Staff.findOne({ staffId: doctorId });
+    if (!existingStaff) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found'
+      });
+    }
+    const doctor = await Doctor.findOne({ staff: existingStaff._id }).populate('staff');
     if (!doctor) {
       return res.status(404).json({
         success: false,
@@ -887,7 +1021,7 @@ const getDashboardStats = async (req, res) => {
     const totalPatients = await Patient.countDocuments({ status: 'active' });
 
     // Total doctors
-    const totalDoctors = await Doctor.countDocuments({ isActive: true });
+    const totalDoctors = await Doctor.countDocuments({ active: true });
 
     // Recent appointments (last 5)
     const recentAppointments = await Appointment.find()

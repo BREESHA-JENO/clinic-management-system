@@ -15,17 +15,18 @@
 const { body } = require('express-validator');
 
 exports.validateConsultation = [
-    body('appointmentId').isMongoId().withMessage('Invalid appointment ID'),
-    body('patientId').isMongoId().withMessage('Invalid patient ID'),
+    body('appointmentId').notEmpty().withMessage('Appointment ID is required'),
+    body('patientId').notEmpty().withMessage('Patient ID is required'),
+    body('doctorId').notEmpty().withMessage('Doctor ID is required'),
     body('symptoms').notEmpty().withMessage('Symptoms are required'),
     body('diagnosis').notEmpty().withMessage('Diagnosis is required'),
     body('notes').optional().isString(),
 ];
 
 exports.validateMedicinePrescription = [
-    body('appointmentId').isMongoId().withMessage('Invalid appointment ID'),
-    body('patientId').isMongoId().withMessage('Invalid patient ID'),
-    body('doctorId').isMongoId().withMessage('Invalid doctor ID'),
+    body('appointmentId').notEmpty().withMessage('Appointment ID is required'),
+    body('patientId').notEmpty().withMessage('Patient ID is required'),
+    body('doctorId').notEmpty().withMessage('Doctor ID is required'),
     body('medicines').isArray({ min: 1 }).withMessage('Medicines array must not be empty'),
     body('medicines.*.name').notEmpty().withMessage('Medicine name is required'),
     body('medicines.*.dosage').notEmpty().withMessage('Dosage is required'),
@@ -34,9 +35,9 @@ exports.validateMedicinePrescription = [
 
 
 exports.validateLabTestPrescription = [
-    body('appointmentId').isMongoId().withMessage('Invalid appointment ID'),
-    body('patientId').isMongoId().withMessage('Invalid patient ID'),
-    body('doctorId').isMongoId().withMessage('Invalid doctor ID'),
+    body('appointmentId').notEmpty().withMessage('Appointment ID is required'),
+    body('patientId').notEmpty().withMessage('Patient ID is required'),
+    body('doctorId').notEmpty().withMessage('Doctor ID is required'),
     body('tests').isArray({ min: 1 }).withMessage('Tests array must not be empty'),
     body('tests.*.name').notEmpty().withMessage('Test name is required')
 ];

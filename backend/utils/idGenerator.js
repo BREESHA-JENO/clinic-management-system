@@ -1,184 +1,98 @@
-const { Patient } = require('../models/receptionist');
+const mongoose = require('mongoose');
 
-// Generate unique patient ID
+// Generic ID generator function
+const generateId = async (model, idField, prefix, yearMonth = false) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
+    
+    let searchPattern;
+    if (yearMonth) {
+      searchPattern = { $regex: `^${prefix}${currentYear}${currentMonth}` };
+    } else {
+      searchPattern = { $regex: `^${prefix}${currentYear}` };
+    }
+    
+    const lastRecord = await model.findOne({ [idField]: searchPattern })
+      .sort({ [idField]: -1 });
+    
+    let sequence = 1;
+    
+    if (lastRecord) {
+      const lastSequence = parseInt(lastRecord[idField].slice(-4));
+      sequence = lastSequence + 1;
+    }
+    
+    const id = yearMonth 
+      ? `${prefix}${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`
+      : `${prefix}${currentYear}${sequence.toString().padStart(4, '0')}`;
+    
+    return id;
+  } catch (error) {
+    console.error(`Error generating ${idField}:`, error);
+    throw new Error(`Failed to generate ${idField}`);
+  }
+};
+
+// Patient ID generator
 const generatePatientId = async () => {
-  try {
-    // Get the current year
-    const currentYear = new Date().getFullYear();
-    
-    // Find the last patient with the current year prefix
-    const lastPatient = await Patient.findOne({
-      patientId: { $regex: `^P${currentYear}` }
-    }).sort({ patientId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastPatient) {
-      // Extract the sequence number from the last patient ID
-      const lastSequence = parseInt(lastPatient.patientId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: P20240001, P20240002, etc.
-    const patientId = `P${currentYear}${sequence.toString().padStart(4, '0')}`;
-    
-    return patientId;
-  } catch (error) {
-    console.error('Error generating patient ID:', error);
-    throw new Error('Failed to generate patient ID');
-  }
+  const { Patient } = require('../models/receptionist');
+  return generateId(Patient, 'patientId', 'P', false);
 };
 
-// Generate unique appointment ID
+// Appointment ID generator
 const generateAppointmentId = async () => {
-  try {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-    
-    // Find the last appointment with the current year/month prefix
-    const { Appointment } = require('../models/receptionist');
-    const lastAppointment = await Appointment.findOne({
-      appointmentId: { $regex: `^APT${currentYear}${currentMonth}` }
-    }).sort({ appointmentId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastAppointment) {
-      const lastSequence = parseInt(lastAppointment.appointmentId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: APT2024010001, APT2024010002, etc.
-    const appointmentId = `APT${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`;
-    
-    return appointmentId;
-  } catch (error) {
-    console.error('Error generating appointment ID:', error);
-    throw new Error('Failed to generate appointment ID');
-  }
+  const { Appointment } = require('../models/receptionist');
+  return generateId(Appointment, 'appointmentId', 'APT', true);
 };
 
-// Generate unique billing ID
+// Billing ID generator
 const generateBillingId = async () => {
-  try {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-    
-    // Find the last billing with the current year/month prefix
-    const { Billing } = require('../models/receptionist');
-    const lastBilling = await Billing.findOne({
-      billingId: { $regex: `^BILL${currentYear}${currentMonth}` }
-    }).sort({ billingId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastBilling) {
-      const lastSequence = parseInt(lastBilling.billingId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: BILL2024010001, BILL2024010002, etc.
-    const billingId = `BILL${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`;
-    
-    return billingId;
-  } catch (error) {
-    console.error('Error generating billing ID:', error);
-    throw new Error('Failed to generate billing ID');
-  }
+  const { Billing } = require('../models/receptionist');
+  return generateId(Billing, 'billingId', 'BILL', true);
 };
 
-// Generate unique prescription ID
+// Prescription ID generator
 const generatePrescriptionId = async () => {
-  try {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-    
-    // Find the last prescription with the current year/month prefix
-    const { MedicinePrescription } = require('../models/doctor');
-    const lastPrescription = await MedicinePrescription.findOne({
-      prescriptionId: { $regex: `^MED${currentYear}${currentMonth}` }
-    }).sort({ prescriptionId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastPrescription) {
-      const lastSequence = parseInt(lastPrescription.prescriptionId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: MED2024010001, MED2024010002, etc.
-    const prescriptionId = `MED${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`;
-    
-    return prescriptionId;
-  } catch (error) {
-    console.error('Error generating prescription ID:', error);
-    throw new Error('Failed to generate prescription ID');
-  }
+  const { MedicinePrescription } = require('../models/doctor');
+  return generateId(MedicinePrescription, 'medicinePrescriptionId', 'MED', true);
 };
 
-// Generate unique lab prescription ID
+// Lab prescription ID generator
 const generateLabPrescriptionId = async () => {
-  try {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-    
-    // Find the last lab prescription with the current year/month prefix
-    const { LabTestPrescription } = require('../models/doctor');
-    const lastLabPrescription = await LabTestPrescription.findOne({
-      labPrescriptionId: { $regex: `^LAB${currentYear}${currentMonth}` }
-    }).sort({ labPrescriptionId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastLabPrescription) {
-      const lastSequence = parseInt(lastLabPrescription.labPrescriptionId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: LAB2024010001, LAB2024010002, etc.
-    const labPrescriptionId = `LAB${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`;
-    
-    return labPrescriptionId;
-  } catch (error) {
-    console.error('Error generating lab prescription ID:', error);
-    throw new Error('Failed to generate lab prescription ID');
-  }
+  const { LabTestPrescription } = require('../models/doctor');
+  return generateId(LabTestPrescription, 'labTestPrescriptionId', 'LAB', true);
 };
 
-// Generate unique lab test result ID
+// Lab test result ID generator
 const generateLabTestResultId = async () => {
+  const { LabTestResult } = require('../models/labtechnician');
+  return generateId(LabTestResult, 'resultId', 'RESULT', true);
+};
+
+// Counter-based ID generator for models that use counters
+const generateCounterId = async (counterName, prefix) => {
   try {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-    
-    // Find the last lab test result with the current year/month prefix
-    const { LabTestResult } = require('../models/labtechnician');
-    const lastLabTestResult = await LabTestResult.findOne({
-      resultId: { $regex: `^RESULT${currentYear}${currentMonth}` }
-    }).sort({ resultId: -1 });
-    
-    let sequence = 1;
-    
-    if (lastLabTestResult) {
-      const lastSequence = parseInt(lastLabTestResult.resultId.slice(-4));
-      sequence = lastSequence + 1;
-    }
-    
-    // Format: RESULT2024010001, RESULT2024010002, etc.
-    const resultId = `RESULT${currentYear}${currentMonth}${sequence.toString().padStart(4, '0')}`;
-    
-    return resultId;
+    const Counter = require('../models/counter');
+    const counter = await Counter.findOneAndUpdate(
+      { name: counterName },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    return `${prefix}${String(counter.seq).padStart(3, '0')}`;
   } catch (error) {
-    console.error('Error generating lab test result ID:', error);
-    throw new Error('Failed to generate lab test result ID');
+    console.error(`Error generating counter ID for ${counterName}:`, error);
+    throw new Error(`Failed to generate ${counterName} ID`);
   }
 };
 
 module.exports = {
+  generateId,
   generatePatientId,
   generateAppointmentId,
   generateBillingId,
   generatePrescriptionId,
   generateLabPrescriptionId,
-  generateLabTestResultId
+  generateLabTestResultId,
+  generateCounterId
 }; 

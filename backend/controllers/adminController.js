@@ -1,10 +1,4 @@
 const adminModels = require('../models/admin');
-<<<<<<< HEAD
-const mongoose = require('mongoose');
-const { Role, Staff, Specialization, Doctor } = adminModels;
-
-
-=======
 const User = require('../models/user');
 const mongoose = require('mongoose');
 
@@ -28,7 +22,6 @@ exports.createUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 // ✅ ROLE MANAGEMENT
 exports.createRole = async (req, res) => {
     try {
@@ -173,7 +166,7 @@ exports.getAllSpecializations = async (req, res) => {
 
 exports.getSpecializationById = async (req, res) => {
     try {
-        const spec = await Specialization.findById(req.params.specializationId);
+        const spec = await Specialization.findOne({ specializationId: parseInt(req.params.specializationId) });
         if (!spec) return res.status(404).json({ message: 'Specialization not found' });
         res.json(spec);
     } catch (err) {
@@ -183,7 +176,11 @@ exports.getSpecializationById = async (req, res) => {
 
 exports.updateSpecialization = async (req, res) => {
     try {
-        const updated = await Specialization.findByIdAndUpdate(req.params.specializationId, req.body, { new: true });
+        const updated = await Specialization.findOneAndUpdate(
+            { specializationId: parseInt(req.params.specializationId) }, 
+            req.body, 
+            { new: true }
+        );
         if (!updated) return res.status(404).json({ message: 'Specialization not found' });
         res.json(updated);
     } catch (err) {
@@ -230,7 +227,7 @@ exports.getAllDoctors = async (req, res) => {
 
 exports.getDoctorById = async (req, res) => {
     try {
-        const doctor = await Doctor.findById(req.params.doctorId).populate('staff specialization');
+        const doctor = await Doctor.findOne({ 'staff.staffId': req.params.doctorId }).populate('staff specialization');
         if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
         res.json(doctor);
     } catch (err) {
@@ -240,7 +237,11 @@ exports.getDoctorById = async (req, res) => {
 
 exports.updateDoctor = async (req, res) => {
     try {
-        const updated = await Doctor.findByIdAndUpdate(req.params.doctorId, req.body, { new: true });
+        const updated = await Doctor.findOneAndUpdate(
+            { 'staff.staffId': req.params.doctorId }, 
+            req.body, 
+            { new: true }
+        );
         if (!updated) return res.status(404).json({ message: 'Doctor not found' });
         res.json(updated);
     } catch (err) {
@@ -250,7 +251,11 @@ exports.updateDoctor = async (req, res) => {
 
 exports.deactivateDoctor = async (req, res) => {
     try {
-        const updated = await Doctor.findByIdAndUpdate(req.params.doctorId, { active: false }, { new: true });
+        const updated = await Doctor.findOneAndUpdate(
+            { 'staff.staffId': req.params.doctorId }, 
+            { active: false }, 
+            { new: true }
+        );
         if (!updated) return res.status(404).json({ message: 'Doctor not found' });
         res.json(updated);
     } catch (err) {

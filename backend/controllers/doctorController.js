@@ -1,784 +1,887 @@
-// const { MedicinePrescription, LabTestPrescription } = require('../models/doctor');
-// const { Appointment, Patient, Doctor } = require('../models/receptionist');
-// const { LabTestResult } = require('../models/labtechnician');
-// const { generatePrescriptionId, generateLabPrescriptionId } = require('../utils/idGenerator');
-
-// // ==================== MEDICINE PRESCRIPTION ====================
-
-// // Create Medicine Prescription
-// const createMedicinePrescription = async (req, res) => {
-//   try {
-//     const { appointmentId, patientId, doctorId, details, status } = req.body;
-
-//     // Auto-generate unique prescription ID
-//     const prescriptionId = await generatePrescriptionId();
-
-//     // Check if appointment exists
-//     const appointment = await Appointment.findOne({ appointmentId });
-//     if (!appointment) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Appointment not found'
-//       });
-//     }
-
-//     // Check if patient exists
-//     const patient = await Patient.findOne({ patientId });
-//     if (!patient) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Patient not found'
-//       });
-//     }
-
-//     // Check if doctor exists
-//     const doctor = await Doctor.findOne({ doctorId });
-//     if (!doctor) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Doctor not found'
-//       });
-//     }
-
-//     const prescription = new MedicinePrescription({
-//       prescriptionId,
-//       appointmentId,
-//       patientId,
-//       doctorId,
-//       details,
-//       status: status || 'active'
-//     });
-
-//     await prescription.save();
-
-//     res.status(201).json({
-//       success: true,
-//       message: 'Medicine prescription created successfully',
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error creating medicine prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error creating medicine prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Update Medicine Prescription
-// const updateMedicinePrescription = async (req, res) => {
-//   try {
-//     const { prescriptionId } = req.params;
-//     const updateData = req.body;
-
-//     const prescription = await MedicinePrescription.findOneAndUpdate(
-//       { prescriptionId },
-//       updateData,
-//       { new: true, runValidators: true }
-//     );
-
-//     if (!prescription) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Medicine prescription not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: 'Medicine prescription updated successfully',
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error updating medicine prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error updating medicine prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Get Medicine Prescription by Appointment ID
-// const getMedicinePrescriptionByAppointmentId = async (req, res) => {
-//   try {
-//     const { appointmentId } = req.params;
-
-//     const prescription = await MedicinePrescription.findOne({ appointmentId });
-
-//     if (!prescription) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Medicine prescription not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error getting medicine prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error getting medicine prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // List Medicine Prescriptions by Patient
-// const listMedicinePrescriptionsByPatient = async (req, res) => {
-//   try {
-//     const { patientId } = req.params;
-//     const { page = 1, limit = 10 } = req.query;
-
-//     const prescriptions = await MedicinePrescription.find({ patientId })
-//       .sort({ createdAt: -1 })
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit);
-
-//     const total = await MedicinePrescription.countDocuments({ patientId });
-
-//     res.json({
-//       success: true,
-//       data: prescriptions,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(total / limit),
-//         totalPrescriptions: total
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error listing medicine prescriptions:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error listing medicine prescriptions',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // ==================== LAB TEST PRESCRIPTION ====================
-
-// // Create Lab Test Prescription
-// const createLabTestPrescription = async (req, res) => {
-//   try {
-//     const { appointmentId, patientId, doctorId, testIds, status } = req.body;
-
-//     // Auto-generate unique lab prescription ID
-//     const labPrescriptionId = await generateLabPrescriptionId();
-
-//     // Check if appointment exists
-//     const appointment = await Appointment.findOne({ appointmentId });
-//     if (!appointment) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Appointment not found'
-//       });
-//     }
-
-//     // Check if patient exists
-//     const patient = await Patient.findOne({ patientId });
-//     if (!patient) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Patient not found'
-//       });
-//     }
-
-//     // Check if doctor exists
-//     const doctor = await Doctor.findOne({ doctorId });
-//     if (!doctor) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Doctor not found'
-//       });
-//     }
-
-//     const prescription = new LabTestPrescription({
-//       labPrescriptionId,
-//       appointmentId,
-//       patientId,
-//       doctorId,
-//       testIds,
-//       status: status || 'pending'
-//     });
-
-//     await prescription.save();
-
-//     res.status(201).json({
-//       success: true,
-//       message: 'Lab test prescription created successfully',
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error creating lab test prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error creating lab test prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Update Lab Test Prescription
-// const updateLabTestPrescription = async (req, res) => {
-//   try {
-//     const { prescriptionId } = req.params;
-//     const updateData = req.body;
-
-//     const prescription = await LabTestPrescription.findOneAndUpdate(
-//       { labPrescriptionId: prescriptionId },
-//       updateData,
-//       { new: true, runValidators: true }
-//     );
-
-//     if (!prescription) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Lab test prescription not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: 'Lab test prescription updated successfully',
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error updating lab test prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error updating lab test prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Get Lab Test Prescription by Appointment ID
-// const getLabTestPrescriptionByAppointmentId = async (req, res) => {
-//   try {
-//     const { appointmentId } = req.params;
-
-//     const prescription = await LabTestPrescription.findOne({ appointmentId });
-
-//     if (!prescription) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Lab test prescription not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error getting lab test prescription:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error getting lab test prescription',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // List Lab Test Prescriptions by Patient
-// const listLabTestPrescriptionsByPatient = async (req, res) => {
-//   try {
-//     const { patientId } = req.params;
-//     const { page = 1, limit = 10 } = req.query;
-
-//     const prescriptions = await LabTestPrescription.find({ patientId })
-//       .sort({ createdAt: -1 })
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit);
-
-//     const total = await LabTestPrescription.countDocuments({ patientId });
-
-//     res.json({
-//       success: true,
-//       data: prescriptions,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(total / limit),
-//         totalPrescriptions: total
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error listing lab test prescriptions:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error listing lab test prescriptions',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // ==================== HISTORY ENDPOINTS ====================
-
-// // List Medicine Prescription History by Patient
-// const listMedicinePrescriptionHistoryByPatient = async (req, res) => {
-//   try {
-//     const { patientId } = req.params;
-//     const { page = 1, limit = 10 } = req.query;
-
-//     const prescriptions = await MedicinePrescription.find({ patientId })
-//       .sort({ createdAt: -1 })
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit);
-
-//     const total = await MedicinePrescription.countDocuments({ patientId });
-
-//     res.json({
-//       success: true,
-//       data: prescriptions,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(total / limit),
-//         totalPrescriptions: total
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error listing medicine prescription history:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error listing medicine prescription history',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // List Medicine Prescription History by Doctor
-// const listMedicinePrescriptionHistoryByDoctor = async (req, res) => {
-//   try {
-//     const { doctorId } = req.params;
-//     const { page = 1, limit = 10 } = req.query;
-
-//     const prescriptions = await MedicinePrescription.find({ doctorId })
-//       .sort({ createdAt: -1 })
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit);
-
-//     const total = await MedicinePrescription.countDocuments({ doctorId });
-
-//     res.json({
-//       success: true,
-//       data: prescriptions,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(total / limit),
-//         totalPrescriptions: total
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error listing medicine prescription history:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error listing medicine prescription history',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Get Medicine Prescription History by Appointment ID
-// const getMedicinePrescriptionHistoryByAppointmentId = async (req, res) => {
-//   try {
-//     const { appointmentId } = req.params;
-
-//     const prescription = await MedicinePrescription.findOne({ appointmentId });
-
-//     if (!prescription) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Medicine prescription not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data: prescription
-//     });
-//   } catch (error) {
-//     console.error('Error getting medicine prescription history:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error getting medicine prescription history',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // ==================== LAB TEST RESULTS MANAGEMENT (DOCTOR) ====================
-
-// // List Lab Test Results Sent to Doctor
-// const listLabTestResultsForDoctor = async (req, res) => {
-//   try {
-//     const { doctorId } = req.params;
-//     const { status, page = 1, limit = 10 } = req.query;
-
-//     const query = { doctorId };
-//     if (status) {
-//       query.status = status;
-//     }
-
-//     const labTestResults = await LabTestResult.find(query)
-//       .sort({ sentToDoctorDate: -1 })
-//       .limit(limit * 1)
-//       .skip((page - 1) * limit);
-
-//     const total = await LabTestResult.countDocuments(query);
-
-//     res.json({
-//       success: true,
-//       data: labTestResults,
-//       pagination: {
-//         currentPage: page,
-//         totalPages: Math.ceil(total / limit),
-//         totalResults: total
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error listing lab test results for doctor:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error listing lab test results for doctor',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Accept Lab Test Result
-// const acceptLabTestResult = async (req, res) => {
-//   try {
-//     const { resultId } = req.params;
-//     const { doctorNotes } = req.body;
-
-//     const labTestResult = await LabTestResult.findOneAndUpdate(
-//       { resultId },
-//       { 
-//         status: 'accepted_by_doctor',
-//         acceptedByDoctorDate: new Date(),
-//         doctorNotes: doctorNotes || ''
-//       },
-//       { new: true }
-//     );
-
-//     if (!labTestResult) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Lab test result not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: 'Lab test result accepted successfully',
-//       data: labTestResult
-//     });
-//   } catch (error) {
-//     console.error('Error accepting lab test result:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error accepting lab test result',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Reject Lab Test Result
-// const rejectLabTestResult = async (req, res) => {
-//   try {
-//     const { resultId } = req.params;
-//     const { doctorNotes } = req.body;
-
-//     const labTestResult = await LabTestResult.findOneAndUpdate(
-//       { resultId },
-//       { 
-//         status: 'rejected_by_doctor',
-//         acceptedByDoctorDate: new Date(),
-//         doctorNotes: doctorNotes || ''
-//       },
-//       { new: true }
-//     );
-
-//     if (!labTestResult) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Lab test result not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       message: 'Lab test result rejected successfully',
-//       data: labTestResult
-//     });
-//   } catch (error) {
-//     console.error('Error rejecting lab test result:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error rejecting lab test result',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Get Lab Test Result by ID (for doctor)
-// const getLabTestResultById = async (req, res) => {
-//   try {
-//     const { resultId } = req.params;
-
-//     const labTestResult = await LabTestResult.findOne({ resultId });
-
-//     if (!labTestResult) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Lab test result not found'
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data: labTestResult
-//     });
-//   } catch (error) {
-//     console.error('Error getting lab test result:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Error getting lab test result',
-//       error: error.message
-//     });
-//   }
-// };
-
-// // Health Check
-// const healthCheck = async (req, res) => {
-//   res.json({
-//     success: true,
-//     message: 'Doctor API is running',
-//     timestamp: new Date().toISOString()
-//   });
-// };
-
-// module.exports = {
-//   // Medicine Prescription
-//   createMedicinePrescription,
-//   updateMedicinePrescription,
-//   getMedicinePrescriptionByAppointmentId,
-//   listMedicinePrescriptionsByPatient,
-  
-//   // Lab Test Prescription
-//   createLabTestPrescription,
-//   updateLabTestPrescription,
-//   getLabTestPrescriptionByAppointmentId,
-//   listLabTestPrescriptionsByPatient,
-  
-//   // History
-//   listMedicinePrescriptionHistoryByPatient,
-//   listMedicinePrescriptionHistoryByDoctor,
-//   getMedicinePrescriptionHistoryByAppointmentId,
-  
-//   // Lab Test Results Management (Doctor)
-//   listLabTestResultsForDoctor,
-//   acceptLabTestResult,
-//   rejectLabTestResult,
-//   getLabTestResultById,
-  
-//   // Health Check
-//   healthCheck
-
-// const Doctor = require('../models/doctor');
-// const { validateDoctor } = require('../validation/doctorValidation');
-
-// // Create Doctor
-// exports.createDoctor = async (req, res) => {
-//     const { error } = validateDoctor(req.body);
-//     if (error) return res.status(400).json({ message: error.details[0].message });
-
-//     try {
-//         const existing = await Doctor.findOne({ email: req.body.email });
-//         if (existing) return res.status(400).json({ message: "Doctor already exists" });
-
-//         const doctor = new Doctor(req.body);
-//         await doctor.save();
-//         res.status(201).json(doctor);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
-// // Update Doctor
-// exports.updateDoctor = async (req, res) => {
-//     const { error } = validateDoctor(req.body);
-//     if (error) return res.status(400).json({ message: error.details[0].message });
-
-//     try {
-//         const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//         if (!updatedDoctor) return res.status(404).json({ message: "Doctor not found" });
-
-//         res.json(updatedDoctor);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
-// // Get Doctor by ID
-// exports.getDoctorById = async (req, res) => {
-//     try {
-//         const doctor = await Doctor.findById(req.params.id);
-//         if (!doctor) return res.status(404).json({ message: "Doctor not found" });
-//         res.json(doctor);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
-// // List All Doctors
-// exports.listDoctors = async (req, res) => {
-//     try {
-//         const doctors = await Doctor.find();
-//         res.json(doctors);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
-// // Deactivate Doctor
-// exports.deactivateDoctor = async (req, res) => {
-//     try {
-//         const doctor = await Doctor.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-//         if (!doctor) return res.status(404).json({ message: "Doctor not found" });
-//         res.json({ message: "Doctor deactivated", doctor });
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
 const { Consultation, MedicinePrescription, LabTestPrescription } = require('../models/doctor');
+const { Appointment, Patient, Doctor } = require('../models/receptionist');
+const { Staff } = require('../models/admin');
+const { LabTestResult } = require('../models/labtechnician');
+const { generatePrescriptionId, generateLabPrescriptionId } = require('../utils/idGenerator');
 
-// Consultation
+// ==================== CONSULTATION ====================
+
 exports.addConsultationNote = async (req, res) => {
     try {
-        const consultation = await Consultation.create(req.body);
-        res.status(201).json(consultation);
+        const { appointmentId, patientId, doctorId, symptoms, diagnosis, notes } = req.body;
+
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId });
+        if (!appointment) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Appointment not found' 
+            });
+        }
+
+        // Validate that patient exists
+        const patient = await Patient.findOne({ patientId });
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Patient not found' 
+            });
+        }
+
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: doctorId });
+        if (!doctor) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Doctor not found' 
+            });
+        }
+
+        // Create consultation with string IDs directly
+        const consultation = await Consultation.create({
+            appointmentId: appointmentId, // String ID directly
+            patientId: patientId, // Add patientId to the creation
+            doctorId: doctorId, // String ID directly
+            symptoms,
+            diagnosis,
+            notes: notes || 'No additional notes'
+        });
+
+        // Create response with string IDs
+        const responseData = {
+            _id: consultation._id,
+            consultationId: consultation.consultationId,
+            appointmentId: consultation.appointmentId,
+            patientId: consultation.patientId,
+            doctorId: consultation.doctorId,
+            symptoms: consultation.symptoms,
+            diagnosis: consultation.diagnosis,
+            notes: consultation.notes,
+            date: consultation.date
+        };
+
+        res.status(201).json({
+            success: true,
+            message: 'Consultation created successfully',
+            data: responseData
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ 
+            success: false,
+            message: 'Error creating consultation',
+            error: err.message 
+        });
     }
 };
 
 exports.updateConsultationNote = async (req, res) => {
     try {
-        const consultation = await Consultation.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(consultation);
+        const { appointmentId, doctorId, symptoms, diagnosis, notes } = req.body;
+        
+        // Prepare update data
+        const updateData = {};
+        
+        // Only include fields that are provided
+        if (symptoms !== undefined) updateData.symptoms = symptoms;
+        if (diagnosis !== undefined) updateData.diagnosis = diagnosis;
+        if (notes !== undefined) updateData.notes = notes;
+        
+        // Handle appointmentId validation if provided
+        if (appointmentId) {
+            const appointment = await Appointment.findOne({ appointmentId });
+            if (!appointment) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Appointment not found' 
+                });
+            }
+            updateData.appointmentId = appointmentId; // Use string ID directly
+        }
+        
+        // Handle doctorId validation if provided
+        if (doctorId) {
+            const doctor = await Staff.findOne({ staffId: doctorId });
+            if (!doctor) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Doctor not found' 
+                });
+            }
+            updateData.doctorId = doctorId; // Use string ID directly
+        }
+        
+        // Find and update consultation by consultationId string
+        const consultation = await Consultation.findOneAndUpdate(
+            { consultationId: req.params.id }, 
+            updateData, 
+            { new: true }
+        );
+        
+        if (!consultation) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Consultation not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Consultation updated successfully',
+            data: consultation
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ 
+            success: false,
+            message: 'Error updating consultation',
+            error: err.message 
+        });
     }
 };
 
 exports.getConsultationByAppointment = async (req, res) => {
     try {
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId: req.params.appointmentId });
+        if (!appointment) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Appointment not found" 
+            });
+        }
+
+        // Find consultation using string appointmentId directly
         const consultation = await Consultation.findOne({ appointmentId: req.params.appointmentId });
-        res.json(consultation);
+
+        if (!consultation) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Consultation not found" 
+            });
+        }
+
+        // Create response with string IDs
+        const responseData = {
+            _id: consultation._id,
+            consultationId: consultation.consultationId,
+            appointmentId: consultation.appointmentId,
+            patientId: appointment.patientId, // Get from appointment
+            doctorId: consultation.doctorId,
+            symptoms: consultation.symptoms,
+            diagnosis: consultation.diagnosis,
+            notes: consultation.notes,
+            date: consultation.date
+        };
+
+        res.json({
+            success: true,
+            data: responseData
+        });
     } catch (err) {
-        res.status(404).json({ error: err.message });
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
     }
 };
 
 exports.listConsultationsByDoctor = async (req, res) => {
     try {
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: req.params.doctorId });
+        if (!doctor) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Doctor not found" 
+            });
+        }
+
+        // Find consultations using string doctorId directly
         const consultations = await Consultation.find({ doctorId: req.params.doctorId });
-        res.json(consultations);
+
+        // Create response with string IDs
+        const responseData = consultations.map(consultation => ({
+            _id: consultation._id,
+            consultationId: consultation.consultationId,
+            appointmentId: consultation.appointmentId,
+            patientId: consultation.patientId, // Will need to get from appointment if needed
+            doctorId: consultation.doctorId,
+            symptoms: consultation.symptoms,
+            diagnosis: consultation.diagnosis,
+            notes: consultation.notes,
+            date: consultation.date
+        }));
+
+        res.json({
+            success: true,
+            data: responseData
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
     }
 };
 
-// Medicine Prescription
+// ==================== MEDICINE PRESCRIPTION ====================
+
 exports.createMedicinePrescription = async (req, res) => {
     try {
-        const prescription = await MedicinePrescription.create(req.body);
-        res.status(201).json(prescription);
+        const { appointmentId, patientId, doctorId, medicines, status } = req.body;
+
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId });
+        if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+
+        // Validate that patient exists
+        const patient = await Patient.findOne({ patientId });
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: doctorId });
+        if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+        // Create prescription with string IDs directly
+        const prescription = await MedicinePrescription.create({
+            appointmentId: appointmentId, // String ID directly
+            patientId: patientId, // String ID directly
+            doctorId: doctorId, // String ID directly
+            medicines: medicines || [],
+            status: status || 'active'
+        });
+
+        // Create response with string IDs
+        const responseData = {
+            _id: prescription._id,
+            medicinePrescriptionId: prescription.medicinePrescriptionId,
+            appointmentId: prescription.appointmentId,
+            patientId: prescription.patientId,
+            doctorId: prescription.doctorId,
+            medicines: prescription.medicines,
+            date: prescription.date
+        };
+
+        res.status(201).json({
+            success: true,
+            message: 'Medicine prescription created successfully',
+            data: responseData
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ 
+            success: false,
+            message: 'Error creating medicine prescription',
+            error: err.message 
+        });
     }
 };
 
 exports.updateMedicinePrescription = async (req, res) => {
     try {
-        const prescription = await MedicinePrescription.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(prescription);
+        const { appointmentId, patientId, doctorId, medicines, status } = req.body;
+        
+        // Prepare update data
+        const updateData = {};
+        
+        // Only include fields that are provided
+        if (medicines !== undefined) updateData.medicines = medicines;
+        if (status !== undefined) updateData.status = status;
+        
+        // Handle appointmentId validation if provided
+        if (appointmentId) {
+            const appointment = await Appointment.findOne({ appointmentId });
+            if (!appointment) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Appointment not found' 
+                });
+            }
+            updateData.appointmentId = appointmentId; // Use string ID directly
+        }
+        
+        // Handle patientId validation if provided
+        if (patientId) {
+            const patient = await Patient.findOne({ patientId });
+            if (!patient) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Patient not found' 
+                });
+            }
+            updateData.patientId = patientId; // Use string ID directly
+        }
+        
+        // Handle doctorId validation if provided
+        if (doctorId) {
+            const doctor = await Staff.findOne({ staffId: doctorId });
+            if (!doctor) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Doctor not found' 
+                });
+            }
+            updateData.doctorId = doctorId; // Use string ID directly
+        }
+        
+        // Find and update prescription by medicinePrescriptionId string
+        const prescription = await MedicinePrescription.findOneAndUpdate(
+            { medicinePrescriptionId: req.params.id }, 
+            updateData, 
+            { new: true }
+        );
+        
+        if (!prescription) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Medicine prescription updated successfully',
+            data: prescription
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
-    }   
+        res.status(400).json({ 
+            success: false,
+            message: 'Error updating medicine prescription',
+            error: err.message 
+        });
+    }
+};
+
+// Get medicine prescription by ID
+exports.getMedicinePrescriptionById = async (req, res) => {
+    try {
+        const { prescriptionId } = req.params;
+        
+        // Find prescription by medicinePrescriptionId string
+        const prescription = await MedicinePrescription.findOne({ 
+            medicinePrescriptionId: prescriptionId 
+        });
+        
+        if (!prescription) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Medicine prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: prescription
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            message: 'Error retrieving medicine prescription',
+            error: err.message 
+        });
+    }
 };
 
 exports.getMedicineByAppointment = async (req, res) => {
     try {
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId: req.params.appointmentId });
+        if (!appointment) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Appointment not found' 
+            });
+        }
+
+        // Find prescription using string appointmentId directly
         const prescription = await MedicinePrescription.findOne({ appointmentId: req.params.appointmentId });
-        res.json(prescription);
+        if (!prescription) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: prescription
+        });
     } catch (err) {
-        res.status(404).json({ error: err.message });
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
     }
 };
 
 exports.listMedicineByPatient = async (req, res) => {
     try {
-        const prescriptions = await MedicinePrescription.find({ patientId: req.params.patientId });
-        res.json(prescriptions);
+        const { page = 1, limit = 10 } = req.query;
+        const { patientId } = req.params;
+
+        // Validate that patient exists
+        const patient = await Patient.findOne({ patientId });
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Patient not found' 
+            });
+        }
+
+        // Find prescriptions using string patientId directly
+        const prescriptions = await MedicinePrescription.find({ patientId: patientId })
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await MedicinePrescription.countDocuments({ patientId: patientId });
+
+        res.json({
+            success: true,
+            data: prescriptions,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPrescriptions: total
+            }
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
     }
 };
 
-// Lab Test Prescription
+exports.listMedicineHistoryByDoctor = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const { doctorId } = req.params;
+
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: doctorId });
+        if (!doctor) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Doctor not found' 
+            });
+        }
+
+        // Find prescriptions using string doctorId directly
+        const prescriptions = await MedicinePrescription.find({ doctorId: doctorId })
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await MedicinePrescription.countDocuments({ doctorId: doctorId });
+
+        res.json({
+            success: true,
+            data: prescriptions,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPrescriptions: total
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
+    }
+};
+
+// ==================== LAB TEST PRESCRIPTION ====================
+
 exports.createLabTestPrescription = async (req, res) => {
     try {
-        const test = await LabTestPrescription.create(req.body);
-        res.status(201).json(test);
+        const { appointmentId, patientId, doctorId, tests, status } = req.body;
+
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId });
+        if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+
+        // Validate that patient exists
+        const patient = await Patient.findOne({ patientId });
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: doctorId });
+        if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+        // Create lab test prescription with string IDs directly
+        const test = await LabTestPrescription.create({
+            appointmentId: appointmentId, // String ID directly
+            patientId: patientId, // String ID directly
+            doctorId: doctorId, // String ID directly
+            tests: tests || [],
+            status: status || 'pending'
+        });
+
+        // Create response with string IDs
+        const responseData = {
+            _id: test._id,
+            labTestPrescriptionId: test.labTestPrescriptionId,
+            appointmentId: test.appointmentId,
+            patientId: test.patientId,
+            doctorId: test.doctorId,
+            tests: test.tests,
+            date: test.date
+        };
+
+        res.status(201).json({
+            success: true,
+            message: 'Lab test prescription created successfully',
+            data: responseData
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ 
+            success: false,
+            message: 'Error creating lab test prescription',
+            error: err.message 
+        });
     }
 };
 
 exports.updateLabTestPrescription = async (req, res) => {
     try {
-        const test = await LabTestPrescription.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(test);
+        const { appointmentId, patientId, doctorId, tests, status } = req.body;
+        
+        // Prepare update data
+        const updateData = {};
+        
+        // Only include fields that are provided
+        if (tests !== undefined) updateData.tests = tests;
+        if (status !== undefined) updateData.status = status;
+        
+        // Handle appointmentId validation if provided
+        if (appointmentId) {
+            const appointment = await Appointment.findOne({ appointmentId });
+            if (!appointment) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Appointment not found' 
+                });
+            }
+            updateData.appointmentId = appointmentId; // Use string ID directly
+        }
+        
+        // Handle patientId validation if provided
+        if (patientId) {
+            const patient = await Patient.findOne({ patientId });
+            if (!patient) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Patient not found' 
+                });
+            }
+            updateData.patientId = patientId; // Use string ID directly
+        }
+        
+        // Handle doctorId validation if provided
+        if (doctorId) {
+            const doctor = await Staff.findOne({ staffId: doctorId });
+            if (!doctor) {
+                return res.status(404).json({ 
+                    success: false,
+                    message: 'Doctor not found' 
+                });
+            }
+            updateData.doctorId = doctorId; // Use string ID directly
+        }
+        
+        // Find and update lab test prescription by labTestPrescriptionId string
+        const test = await LabTestPrescription.findOneAndUpdate(
+            { labTestPrescriptionId: req.params.id }, 
+            updateData, 
+            { new: true }
+        );
+        
+        if (!test) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Lab test prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Lab test prescription updated successfully',
+            data: test
+        });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ 
+            success: false,
+            message: 'Error updating lab test prescription',
+            error: err.message 
+        });
+    }
+};
+
+// Get lab test prescription by ID
+exports.getLabTestPrescriptionById = async (req, res) => {
+    try {
+        const { prescriptionId } = req.params;
+        
+        // Find prescription by labTestPrescriptionId string
+        const prescription = await LabTestPrescription.findOne({ 
+            labTestPrescriptionId: prescriptionId 
+        });
+        
+        if (!prescription) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Lab test prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: prescription
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            message: 'Error retrieving lab test prescription',
+            error: err.message 
+        });
     }
 };
 
 exports.getLabTestByAppointment = async (req, res) => {
     try {
+        // Validate that appointment exists
+        const appointment = await Appointment.findOne({ appointmentId: req.params.appointmentId });
+        if (!appointment) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Appointment not found' 
+            });
+        }
+
+        // Find lab test prescription using string appointmentId directly
         const test = await LabTestPrescription.findOne({ appointmentId: req.params.appointmentId });
-        res.json(test);
+        if (!test) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Lab test prescription not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: test
+        });
     } catch (err) {
-        res.status(404).json({ error: err.message });
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
     }
 };
 
 exports.listLabTestsByPatient = async (req, res) => {
     try {
-        const tests = await LabTestPrescription.find({ patientId: req.params.patientId });
-        res.json(tests);
+        const { page = 1, limit = 10 } = req.query;
+        const { patientId } = req.params;
+
+        // Validate that patient exists
+        const patient = await Patient.findOne({ patientId });
+        if (!patient) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Patient not found' 
+            });
+        }
+
+        // Find lab test prescriptions using string patientId directly
+        const tests = await LabTestPrescription.find({ patientId: patientId })
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await LabTestPrescription.countDocuments({ patientId: patientId });
+
+        res.json({
+            success: true,
+            data: tests,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPrescriptions: total
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
+    }
+};
+
+// ==================== LAB TEST RESULT MANAGEMENT ====================
+
+exports.listLabTestResultsForDoctor = async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+        const { status, page = 1, limit = 10 } = req.query;
+
+        // Validate that doctor exists
+        const doctor = await Staff.findOne({ staffId: doctorId });
+        if (!doctor) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Doctor not found' 
+            });
+        }
+
+        const query = { doctorId: doctorId }; // Use string ID directly
+        if (status) query.status = status;
+
+        const results = await LabTestResult.find(query)
+            .sort({ sentToDoctorDate: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const total = await LabTestResult.countDocuments(query);
+
+        res.json({
+            success: true,
+            data: results,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalResults: total
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            success: false,
+            error: err.message 
+        });
+    }
+};
+
+exports.acceptLabTestResult = async (req, res) => {
+    try {
+        const { resultId } = req.params;
+        const { doctorNotes } = req.body;
+
+        const result = await LabTestResult.findOneAndUpdate(
+            { resultId },
+            {
+                status: 'accepted_by_doctor',
+                acceptedByDoctorDate: new Date(),
+                doctorNotes: doctorNotes || ''
+            },
+            { new: true }
+        );
+
+        if (!result) return res.status(404).json({ message: 'Lab test result not found' });
+
+        res.json({ success: true, message: 'Accepted successfully', data: result });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Consultation & Prescription History
-exports.listConsultationHistoryByPatient = exports.listMedicineByPatient;
-exports.listConsultationHistoryByDoctor = exports.listConsultationsByDoctor;
-exports.getConsultationHistoryByAppointment = exports.getConsultationByAppointment;
-exports.listMedicineHistoryByDoctor = async (req, res) => {
+exports.rejectLabTestResult = async (req, res) => {
     try {
-        const prescriptions = await MedicinePrescription.find({ doctorId: req.params.doctorId });
-        res.json(prescriptions);
+        const { resultId } = req.params;
+        const { doctorNotes } = req.body;
+
+        const result = await LabTestResult.findOneAndUpdate(
+            { resultId },
+            {
+                status: 'rejected_by_doctor',
+                acceptedByDoctorDate: new Date(),
+                doctorNotes: doctorNotes || ''
+            },
+            { new: true }
+        );
+
+        if (!result) return res.status(404).json({ message: 'Lab test result not found' });
+
+        res.json({ success: true, message: 'Rejected successfully', data: result });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
+exports.getLabTestResultById = async (req, res) => {
+    try {
+        const { resultId } = req.params;
+
+        const result = await LabTestResult.findOne({ resultId });
+        if (!result) return res.status(404).json({ message: 'Lab test result not found' });
+
+        res.json({ success: true, data: result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// ==================== HEALTH CHECK ====================
+
+exports.healthCheck = async (req, res) => {
+    res.json({
+        success: true,
+        message: 'Doctor API is running',
+        timestamp: new Date().toISOString()
+    });
+};
+
+// List Consultation History by Patient
+exports.listConsultationHistoryByPatient = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const consultations = await Consultation.find({})
+      .populate({
+        path: 'appointmentId',
+        match: { patientId },
+      })
+      .populate('doctorId', 'name specialization');
+
+    const filteredConsultations = consultations.filter(c => c.appointmentId !== null);
+
+    res.status(200).json(filteredConsultations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve consultation history by patient' });
+  }
+};
+
+// Get Consultation History by Appointment ID
+exports.getConsultationHistoryByAppointmentId = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const consultation = await Consultation.findOne({ appointmentId })
+      .populate('appointmentId')
+      .populate('doctorId', 'name specialization');
+
+    if (!consultation) {
+      return res.status(404).json({ error: 'Consultation not found for appointment' });
+    }
+
+    res.status(200).json(consultation);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve consultation history by appointment ID' });
+  }
+};
+
+// List Consultation History by Doctor
+exports.listConsultationHistoryByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const consultations = await Consultation.find({ doctorId })
+      .populate('appointmentId')
+      .populate('doctorId', 'name specialization');
+
+    res.status(200).json(consultations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve consultation history by doctor' });
+  }
+};
+// ==================== CONSULTATION HISTORY ALIASES ====================
+
+exports.listConsultationHistoryByPatient = exports.listMedicineByPatient;
+exports.getConsultationHistoryByAppointment = exports.getConsultationByAppointment;
+exports.listConsultationHistoryByDoctor = exports.listConsultationsByDoctor;

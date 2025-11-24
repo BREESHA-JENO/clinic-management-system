@@ -10,21 +10,16 @@ const MedicineSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
-<<<<<<< HEAD
-// Medicine Prescription Schema
-const MedicinePrescriptionSchema = new mongoose.Schema({
-=======
 // Medicine Prescription Item Schema
 const MedicinePrescriptionItemSchema = new mongoose.Schema({
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   prescriptionId: { type: String, required: true, unique: true },
-  appointmentId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Appointment' },
+  appointmentId: { type: String, required: true }, // Use custom appointmentId string
   medicineId: { type: String, required: true }, // Reference to Medicine medicineId
   medicineName: { type: String, required: true },
   dosage: { type: String, required: true }, // e.g., "1 tablet twice daily"
   duration: { type: String, required: true }, // e.g., "7 days"
   quantity: { type: Number, required: true },
-  prescribedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' },
+  prescribedBy: { type: String, required: true }, // Use custom doctorId string
   prescribedDoctorName: { type: String, required: true },
   patientName: { type: String, required: true },
   patientAge: { type: Number, required: true },
@@ -65,21 +60,13 @@ const MedicineBillSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Medicine = mongoose.model('Medicine', MedicineSchema);
-<<<<<<< HEAD
-const MedicinePrescription = mongoose.model('MedicinePrescription', MedicinePrescriptionSchema);
-=======
 const MedicinePrescriptionItem = mongoose.model('MedicinePrescriptionItem', MedicinePrescriptionItemSchema);
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 const MedicineInventory = mongoose.model('MedicineInventory', MedicineInventorySchema);
 const MedicineBill = mongoose.model('MedicineBill', MedicineBillSchema);
 
 module.exports = {
   Medicine,
-<<<<<<< HEAD
-  MedicinePrescription,
-=======
   MedicinePrescriptionItem,
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   MedicineInventory,
   MedicineBill,
 };

@@ -66,13 +66,14 @@ staffSchema.pre('save', async function (next) {
             const prefixMap = {
                 receptionist: 'rec',
                 doctor: 'doc',
-                labtechnician: 'lab',
+                'lab technician': 'lab',
                 pharmacist: 'ph'
             };
 
             const prefix = prefixMap[roleData.name.toLowerCase()] || 'stf';
 
-            const count = await mongoose.model('Staff').countDocuments({
+            // Use this.constructor instead of mongoose.model to avoid circular references
+            const count = await this.constructor.countDocuments({
                 staffId: { $regex: `^${prefix}` }
             });
 
@@ -100,7 +101,7 @@ const specializationSchema = new mongoose.Schema({
 specializationSchema.pre('save', async function (next) {
     try {
         if (!this.specializationId) {
-            const last = await mongoose.model('Specialization').findOne({}).sort({ specializationId: -1 });
+            const last = await this.constructor.findOne({}).sort({ specializationId: -1 });
             this.specializationId = last ? last.specializationId + 1 : 1001;
         }
         next();

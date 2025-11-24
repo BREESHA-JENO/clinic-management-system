@@ -9,16 +9,11 @@ const LabTestSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
-<<<<<<< HEAD
-// Lab Test Prescription Schema
-const LabTestPrescriptionSchema = new mongoose.Schema({
-=======
 // Lab Test Prescription Item Schema
 const LabTestPrescriptionItemSchema = new mongoose.Schema({
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
-  appointmentId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Appointment' },
-  labTestId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTest' },
-  prescribedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' },
+  appointmentId: { type: String, required: true }, // Use custom appointmentId string
+  labTestId: { type: String, required: true }, // Use custom testId string
+  prescribedBy: { type: String, required: true }, // Use custom doctorId string
   prescribedDoctorName: { type: String, required: true },
   prescribedDate: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
@@ -27,11 +22,7 @@ const LabTestPrescriptionItemSchema = new mongoose.Schema({
 // Lab Test Result Schema
 const LabTestResultSchema = new mongoose.Schema({
   resultId: { type: String, required: true, unique: true },
-<<<<<<< HEAD
-  labTestPrescriptionId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTestPrescription' },
-=======
-  labTestPrescriptionItemId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'LabTestPrescriptionItem' },
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
+  labTestPrescriptionItemId: { type: String, required: true }, // Use custom prescriptionId string
   testId: { type: String, required: true }, // Reference to LabTest testId
   result: { type: String, required: true },
   currentValue: { type: Number, required: true },
@@ -41,7 +32,7 @@ const LabTestResultSchema = new mongoose.Schema({
   price: { type: Number, required: true }, // Price from LabTest
   patientName: { type: String, required: true },
   patientAge: { type: Number, required: true },
-  recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'LabTechnician' },
+  recordedBy: { type: String, required: true }, // Use custom technicianId string
   recordedByTechnicianName: { type: String, required: true },
   recordedAt: { type: Date, default: Date.now },
   resultDate: { type: Date, default: Date.now },
@@ -49,19 +40,11 @@ const LabTestResultSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const LabTest = mongoose.model('LabTest', LabTestSchema);
-<<<<<<< HEAD
-const LabTestPrescription = mongoose.model('LabTestPrescription', LabTestPrescriptionSchema);
-=======
 const LabTestPrescriptionItem = mongoose.model('LabTestPrescriptionItem', LabTestPrescriptionItemSchema);
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
 const LabTestResult = mongoose.model('LabTestResult', LabTestResultSchema);
 
 module.exports = {
   LabTest,
-<<<<<<< HEAD
-  LabTestPrescription,
-=======
   LabTestPrescriptionItem,
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
   LabTestResult,
 };

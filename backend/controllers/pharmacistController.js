@@ -1,17 +1,15 @@
-<<<<<<< HEAD
-const { Medicine, MedicinePrescription, MedicineInventory, MedicineBill } = require('../models/pharmacist');
-=======
 const { Medicine, MedicinePrescriptionItem, MedicineInventory, MedicineBill } = require('../models/pharmacist');
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
+const { MedicinePrescription } = require('../models/doctor');
+const { LabTestPrescription } = require('../models/doctor');
+const { Appointment, Patient } = require('../models/receptionist');
+const { Staff } = require('../models/admin');
 
 // Medicine Management
 exports.addMedicine = async (req, res) => {
   try {
     const { name, description, manufacturer, price } = req.body;
-    
     // Generate unique medicine ID
     const medicineId = `MED${Date.now()}`;
-    
     const medicine = new Medicine({
       medicineId,
       name,
@@ -28,7 +26,11 @@ exports.addMedicine = async (req, res) => {
 
 exports.updateMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(req.params.medicineId, req.body, { new: true });
+    const medicine = await Medicine.findOneAndUpdate(
+      { medicineId: req.params.medicineId }, 
+      req.body, 
+      { new: true }
+    );
     if (!medicine) return res.status(404).json({ error: 'Medicine not found' });
     res.json(medicine);
   } catch (err) {
@@ -38,7 +40,7 @@ exports.updateMedicine = async (req, res) => {
 
 exports.getMedicineById = async (req, res) => {
   try {
-    const medicine = await Medicine.findById(req.params.medicineId);
+    const medicine = await Medicine.findOne({ medicineId: req.params.medicineId });
     if (!medicine) return res.status(404).json({ error: 'Medicine not found' });
     res.json(medicine);
   } catch (err) {
@@ -57,7 +59,11 @@ exports.listMedicines = async (req, res) => {
 
 exports.deactivateMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(req.params.medicineId, { isActive: false }, { new: true });
+    const medicine = await Medicine.findOneAndUpdate(
+      { medicineId: req.params.medicineId }, 
+      { isActive: false }, 
+      { new: true }
+    );
     if (!medicine) return res.status(404).json({ error: 'Medicine not found' });
     res.json(medicine);
   } catch (err) {
@@ -129,15 +135,9 @@ exports.createMedicinePrescription = async (req, res) => {
       patientName,
       patientAge
     } = req.body;
-
     // Generate unique prescription ID
     const prescriptionId = `PRESC${Date.now()}`;
-
-<<<<<<< HEAD
-    const prescription = new MedicinePrescription({
-=======
     const prescription = new MedicinePrescriptionItem({
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
       prescriptionId,
       appointmentId,
       medicineId,
@@ -150,7 +150,6 @@ exports.createMedicinePrescription = async (req, res) => {
       patientName,
       patientAge
     });
-
     await prescription.save();
     res.status(201).json(prescription);
   } catch (err) {
@@ -161,11 +160,7 @@ exports.createMedicinePrescription = async (req, res) => {
 exports.getMedicinePrescriptionById = async (req, res) => {
   try {
     const { prescriptionId } = req.params;
-<<<<<<< HEAD
-    const prescription = await MedicinePrescription.findOne({ prescriptionId });
-=======
     const prescription = await MedicinePrescriptionItem.findOne({ prescriptionId });
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
     res.json(prescription);
   } catch (err) {
@@ -176,11 +171,7 @@ exports.getMedicinePrescriptionById = async (req, res) => {
 exports.getPatientPrescriptions = async (req, res) => {
   try {
     const { patientName } = req.params;
-<<<<<<< HEAD
-    const prescriptions = await MedicinePrescription.find({ patientName });
-=======
     const prescriptions = await MedicinePrescriptionItem.find({ patientName });
->>>>>>> d890af73c091528a847f4dd611078c653778c3e1
     res.json(prescriptions);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -199,15 +190,12 @@ exports.createMedicineBill = async (req, res) => {
       issuedBy,
       paymentMethod
     } = req.body;
-
     // Generate unique bill ID
     const billId = `BILL${Date.now()}`;
-
     // Calculate totals
     const subtotal = medicines.reduce((sum, med) => sum + med.totalPrice, 0);
     const tax = subtotal * 0.05; // 5% tax
     const totalAmount = subtotal + tax;
-
     const bill = new MedicineBill({
       billId,
       prescriptionId,
@@ -221,7 +209,6 @@ exports.createMedicineBill = async (req, res) => {
       issuedBy,
       paymentMethod
     });
-
     await bill.save();
     res.status(201).json(bill);
   } catch (err) {
@@ -244,13 +231,11 @@ exports.updateBillPaymentStatus = async (req, res) => {
   try {
     const { billId } = req.params;
     const { isPaid, paymentMethod } = req.body;
-    
     const bill = await MedicineBill.findOneAndUpdate(
       { billId },
       { isPaid, paymentMethod },
       { new: true }
     );
-    
     if (!bill) return res.status(404).json({ error: 'Bill not found' });
     res.json(bill);
   } catch (err) {
@@ -281,16 +266,57 @@ exports.getMedicinesBySpecialization = async (req, res) => {
   }
 };
 
+exports.getSpecializationByName = async (req, res) => {
+  try {
+    const { specializationName } = req.params;
+    
+    // Import the Specialization model from admin
+    const { Specialization } = require('../models/admin');
+    
+    const specialization = await Specialization.findOne({ 
+      name: { $regex: new RegExp(specializationName, 'i') },
+      isActive: true 
+    });
+    
+    if (!specialization) {
+      return res.status(404).json({ 
+        error: `Specialization '${specializationName}' not found` 
+      });
+    }
+    
+    res.json(specialization);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.getAllSpecializations = async (req, res) => {
+  try {
+    // Import the Specialization model from admin
+    const { Specialization } = require('../models/admin');
+    
+    const specializations = await Specialization.find({ isActive: true })
+      .select('specializationId name description')
+      .sort({ name: 1 });
+    
+    res.json(specializations);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 exports.processDoctorPrescription = async (req, res) => {
   try {
     const { prescriptionId, medicines, patientId, doctorId } = req.body;
     
-    // Validate prescription exists
-    const prescription = await require('../models/doctor').Prescription.findOne({ prescriptionId });
+    // Validate prescription exists using MedicinePrescription model
+    const { MedicinePrescription } = require('../models/doctor');
+    const prescription = await MedicinePrescription.findOne({ medicinePrescriptionId: prescriptionId });
+    
     if (!prescription) {
       return res.status(404).json({ error: 'Prescription not found' });
     }
-
+    
     // Check medicine availability
     const unavailableMedicines = [];
     for (let medicine of medicines) {
@@ -302,14 +328,14 @@ exports.processDoctorPrescription = async (req, res) => {
         unavailableMedicines.push(medicine.medicineName);
       }
     }
-
+    
     if (unavailableMedicines.length > 0) {
       return res.status(400).json({ 
         error: 'Some medicines are not available in sufficient quantity',
         unavailableMedicines 
       });
     }
-
+    
     // Update inventory
     for (let medicine of medicines) {
       await MedicineInventory.findOneAndUpdate(
@@ -317,7 +343,7 @@ exports.processDoctorPrescription = async (req, res) => {
         { $inc: { quantity: -medicine.quantity } }
       );
     }
-
+    
     res.json({ 
       message: 'Prescription processed successfully',
       prescriptionId,
@@ -334,5 +360,100 @@ exports.getMedicineInventoryStatus = async (req, res) => {
     res.json(inventory);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+// ==================== CROSS-MODULE INTEGRATION ====================
+
+// Fetch prescriptions from Doctor module
+exports.getDoctorPrescriptions = async (req, res) => {
+  try {
+    const { patientId, appointmentId, doctorId } = req.query;
+    let query = {};
+
+    // Since receptionist models use string IDs and doctor models use ObjectIds,
+    // we need to handle this mismatch. For now, we'll return all prescriptions
+    // and let the frontend filter if needed.
+    
+    const prescriptions = await MedicinePrescription.find()
+      .sort({ date: -1 });
+
+    // Convert to string IDs for response and add patient/doctor info
+    const responseData = await Promise.all(prescriptions.map(async (prescription) => {
+      // Get patient info
+      const patient = await Patient.findOne({ patientId: prescription.patientId });
+      // Get doctor info
+      const doctor = await Staff.findOne({ staffId: prescription.doctorId });
+      // Get appointment info
+      const appointment = await Appointment.findOne({ appointmentId: prescription.appointmentId });
+
+      return {
+        _id: prescription._id,
+        medicinePrescriptionId: prescription.medicinePrescriptionId,
+        appointmentId: appointment?.appointmentId || prescription.appointmentId,
+        patientId: patient?.patientId || prescription.patientId,
+        patientName: patient?.name || 'Unknown Patient',
+        doctorId: doctor?.staffId || prescription.doctorId,
+        doctorName: doctor?.name || 'Unknown Doctor',
+        medicines: prescription.medicines,
+        date: prescription.date
+      };
+    }));
+
+    res.json({
+      success: true,
+      data: responseData
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
+  }
+};
+
+// Fetch lab test prescriptions from Doctor module
+exports.getLabTestPrescriptions = async (req, res) => {
+  try {
+    const { patientId, appointmentId, doctorId } = req.query;
+    
+    // Since receptionist models use string IDs and doctor models use ObjectIds,
+    // we need to handle this mismatch. For now, we'll return all lab test prescriptions
+    // and let the frontend filter if needed.
+    
+    const labTests = await LabTestPrescription.find()
+      .sort({ date: -1 });
+
+    // Convert to string IDs for response and add patient/doctor info
+    const responseData = await Promise.all(labTests.map(async (test) => {
+      // Get patient info
+      const patient = await Patient.findOne({ patientId: test.patientId });
+      // Get doctor info
+      const doctor = await Staff.findOne({ staffId: test.doctorId });
+      // Get appointment info
+      const appointment = await Appointment.findOne({ appointmentId: test.appointmentId });
+
+      return {
+        _id: test._id,
+        labTestPrescriptionId: test.labTestPrescriptionId,
+        appointmentId: appointment?.appointmentId || test.appointmentId,
+        patientId: patient?.patientId || test.patientId,
+        patientName: patient?.name || 'Unknown Patient',
+        doctorId: doctor?.staffId || test.doctorId,
+        doctorName: doctor?.name || 'Unknown Doctor',
+        tests: test.tests,
+        date: test.date
+      };
+    }));
+
+    res.json({
+      success: true,
+      data: responseData
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
   }
 };
